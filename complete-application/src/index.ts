@@ -67,8 +67,11 @@ const userDetails = 'userDetails'; //Non Http-Only with user info (not trusted)
 
 const client = new FusionAuthClient('noapikeyneeded', fusionAuthURL);
 
+//tag::views-hbs[]
 app.set('views', path.join(__dirname, '../templates'));
 app.set('view engine', 'hbs');
+//end::views-hbs[]
+
 app.use(cookieParser());
 /** Decode Form URL Encoded & json data */
 app.use(express.urlencoded());
@@ -92,8 +95,10 @@ async function validateUserToken(req: any, res: any, next: any) {
     next();
   }
 }
+//end::security[]
 
 
+//tag::get-active-devicelist[]
 /**
   Middleware to check if the user has exceeded the device limit. Redirects to the device-limit page if so.
  */
@@ -121,22 +126,22 @@ async function getActiveDeviceList(req: any): Promise<any> {
   });
   const tokens: any = await tokenResponse.json();
 
-  // Filter tokens that are for this application: 
+  // Filter tokens that are for this application:
   tokens.refreshTokens = tokens.refreshTokens.filter((t: any) => t.applicationId && t.applicationId === clientId);
   // remove the current session token
   tokens.refreshTokens = tokens.refreshTokens.filter((t: any) => t.token !== userTokenCookie.refresh_token);
 
-  // Map to a simple object for display, removing token values etc. 
+  // Map to a simple object for display, removing token values etc.
   return tokens.refreshTokens.map((t: any) => ({
     id: t.id,
     deviceName: t.metaData.device.name,
-    startInstant: new Date(t.startInstant).toUTCString(), 
+    startInstant: new Date(t.startInstant).toUTCString(),
     ipAddress: t.metaData.lastAccessedAddress
   }));
 
 }
+//end::get-active-devicelist[]
 
-//end::security[]
 
 
 //tag::homepage[]
@@ -198,7 +203,7 @@ app.get('/oauth-redirect', async (req, res, next) => {
     res.cookie(userToken, accessToken, { httpOnly: true })
 
     //TODO: Remove this logging line:
-    console.log(`Access Token: ${accessToken.access_token.substring(0, 10)} ...`); 
+    console.log(`Access Token: ${accessToken.access_token.substring(0, 10)} ...`);
     console.log(`Refresh Token: ${accessToken.refresh_token?.substring(0, 10)} ...`);
 
     // Exchange Access Token for User
@@ -228,9 +233,11 @@ app.get("/account", validateUserToken, checkDeviceLimit, async (req: any, res: a
 //end::account[]
 
 //tag::make-change[]
+//tag::make-change-check-devicelimit[]
 app.get("/make-change", validateUserToken, checkDeviceLimit, async (req, res) => {
   res.sendFile(path.join(__dirname, '../templates/make-change.html'));
 });
+//end::make-change-check-devicelimit[]
 
 // This endpoint is called by Javascript as an API call, so the security is handled a bit differently,
 // as we don't want to redirect the user, we just want to block the request.
@@ -293,13 +300,15 @@ app.get('/oauth2/logout', (req, res, next) => {
 //end::oauth-logout[]
 
 //tag::device-limiting[]
-
+//tag::device-limiting-maxcount[]
 app.get("/device-limit", validateUserToken,  async (req, res) => {
 
     const devices = await getActiveDeviceList(req);
     res.render('device-limit', { devices, maxDeviceCount });
 });
+//end::device-limiting-maxcount[]
 
+//tag::device-limiting-validatetoken[]
 app.post("/device-limit", validateUserToken, async (req, res) => {
 
   // Get the refresh token id from the form
@@ -324,7 +333,7 @@ app.post("/device-limit", validateUserToken, async (req, res) => {
 
   res.redirect('/account');
 });
-
+//end::device-limiting-validatetoken[]
 //end::device-limiting[]
 
 // start the Express server

@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>FusionAuth Express Web</title>
@@ -8,7 +8,7 @@
   <div id="page-container">
     <div id="page-header">
       <div id="logo-header">
-        <img src="https://fusionauth.io/assets/img/samplethemes/changebank/changebank.svg" />
+        <img src="https://fusionauth.io/cdn/samplethemes/changebank/changebank.svg" />
         <div class="h-row">
           <p class="header-email"></p>
           <a class="button-lg" href="/logout">Logout</a>
@@ -39,7 +39,7 @@
         </div>
       </div>
     </div>
-
+  </div>
     <script>
       // Snag cookie user data
       const user = JSON.parse(decodeURIComponent(document.cookie.split('; ').filter(c => c.includes('userDetails')).at(0).split('=').at(-1)).replace('j:', ''))
